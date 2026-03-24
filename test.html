@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Pest Detection - Test Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+    h1 { color: #2d7a2d; }
+    h2 { color: #444; margin-top: 30px; }
+    button { background: #2d7a2d; color: white; border: none; padding: 10px 20px; margin: 6px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    button:hover { background: #1a5c1a; }
+    input { padding: 10px; width: 60%; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    #result { background: white; padding: 20px; margin-top: 20px; border-radius: 8px; border-left: 4px solid #2d7a2d; white-space: pre-wrap; font-size: 14px; min-height: 60px; }
+    .tag { background: #e0f0e0; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 6px; color: #2d7a2d; }
+  </style>
+</head>
+<body>
+
+  <h1>Smart Pest Detection — Test Panel</h1>
+  <p>Make sure your Flask app is running on <strong>http://127.0.0.1:5000</strong></p>
+
+  <h2>System Status</h2>
+  <button onclick="test('/')">Check API is alive</button>
+
+  <h2>Quick Diagnosis Tests</h2>
+  <button onclick="testMsg('my maize has yellow streaks and is dying')">English — Maize MLN <span class="tag">EN</span></button>
+  <button onclick="testMsg('mahindi yana madoa ya njano na kahawia')">Swahili — Maize spots <span class="tag">SW</span></button>
+  <button onclick="testMsg('mahindi imekufa mob ina yellow mob')">Sheng — Maize dying <span class="tag">Sheng</span></button>
+  <button onclick="testMsg('nyanya inaoza haraka na harufu mbaya')">Swahili — Tomato blight <span class="tag">SW</span></button>
+  <button onclick="testMsg('my beans have orange powder under leaves')">English — Bean rust <span class="tag">EN</span></button>
+  <button onclick="testMsg('viazi vina madoa meusi na kuoza')">Swahili — Potato blight <span class="tag">SW</span></button>
+
+  <h2>Conversation Flow Test</h2>
+  <p>Use the same phone number to simulate a full conversation:</p>
+  <button onclick="testConv('+254700000001', 'hello')">Step 1 — Start conversation</button>
+  <button onclick="testConv('+254700000001', '1')">Step 2 — Select Maize</button>
+  <button onclick="testConv('+254700000001', 'yellow leaves with brown spots and holes')">Step 3 — Describe symptoms</button>
+  <button onclick="testConv('+254700000001', 'nakuru')">Step 4 — Give county (Nakuru)</button>
+
+  <h2>Admin Panel</h2>
+  <button onclick="test('/admin/queries')">View all farmer queries</button>
+  <button onclick="test('/admin/farmers')">View all registered farmers</button>
+
+  <h2>Custom Test</h2>
+  <input type="text" id="customMsg" placeholder="Type any message here e.g. my tomato has spots" />
+  <button onclick="testCustom()">Test</button>
+
+  <h2>Result</h2>
+  <div id="result">Results will appear here...</div>
+
+<script>
+  const BASE = "http://127.0.0.1:5000";
+
+  async function test(path) {
+    document.getElementById("result").innerText = "Loading...";
+    try {
+      const res = await fetch(BASE + path);
+      const data = await res.json();
+      document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+    } catch(e) {
+      document.getElementById("result").innerText = "Error: " + e.message + "\nMake sure Flask is running!";
+    }
+  }
+
+  async function testMsg(msg) {
+    await test("/sms/test?msg=" + encodeURIComponent(msg));
+  }
+
+  async function testConv(phone, msg) {
+    await test("/sms/test?phone=" + encodeURIComponent(phone) + "&msg=" + encodeURIComponent(msg));
+  }
+
+  async function testCustom() {
+    const msg = document.getElementById("customMsg").value;
+    if (!msg) { alert("Please type a message first"); return; }
+    await testMsg(msg);
+  }
+</script>
+
+</body>
+</html>
