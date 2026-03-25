@@ -2,21 +2,16 @@ import os
 from app import create_app
 from app.models.database import init_db
 
-# 1. Initialize the app globally so Gunicorn can see it
+# Initialize the app factory
 app = create_app()
 
-# 2. Add a simple Home route directly here to stop the 404
-@app.route('/')
-def home():
-    return "🌱 Smart-Pest-Detection is LIVE and listening!"
-
 if __name__ == "__main__":
-    # Create database on first run
+    # Create the database on the first run
     init_db() 
     
-    # Get port from environment (Render) or use 5000 (Local)
-    port = int(os.environ.get("PORT", 5000))
+    # Use the port Render gives you, or 10000 by default
+    port = int(os.environ.get("PORT", 10000))
     
-    # 0.0.0.0 is CRITICAL for Render
-    print(f"🚀 Server starting on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # '0.0.0.0' is mandatory to allow Africa's Talking to reach your app
+    print(f"🚀 Smart-Pest-Detection starting on port {port}")
+    app.run(host='0.0.0.0', port=port)
